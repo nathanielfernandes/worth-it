@@ -34,20 +34,23 @@ const CARD_CSS = `
 }
 .card.in { opacity: 1; }
 .head { display: flex; align-items: center; gap: 8px; }
-.icon { flex: none; width: 18px; height: 18px; color: #4ade80; }
+.icon { flex: none; width: 15px; height: 18px; color: #fafafa; }
 .title::before { content: attr(data-t); }
 .title { font-size: 18px; font-weight: 650; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.detail { margin: 1px 0 0 26px; color: rgba(250,250,250,0.55); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.detail { margin: 1px 0 0 23px; color: rgba(250,250,250,0.55); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .detail::before { content: attr(data-t); }
 .toast { width: auto; padding: 9px 14px; border-radius: 999px; }
 .toast .title { font-size: 13px; font-weight: 550; }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
 `;
 
-/** Hourglass glyph shared by the card and the inline badges. */
-export const HOURGLASS = `<path d="M5 3h14M5 21h14"/><path d="M7 3.5h10c0 4.5-4 5.5-4 8.5s4 4 4 8.5H7c0-4.5 4-4 4-8.5S7 8 7 3.5z"/>`;
+/**
+ * The logo mark (hourglass with sand on top and a `$` below), cropped to the glass and drawn in
+ * `currentColor`. Shared with the inline badges. Matches assets/icon.svg.
+ */
+export const MARK = `<svg viewBox="25 19 78 90" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M30 24h68M30 104h68" stroke-width="10"/><path d="M38 26h52c0 24-21 29-21 38s21 14 21 38H38c0-24 21-29 21-38s-21-14-21-38z" stroke-width="8"/></g><path d="M50 38h28c-3 7-9 11-14 14-5-3-11-7-14-14z" fill="currentColor"/><text x="64" y="98" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-weight="800" font-size="29" fill="currentColor">$</text></svg>`;
 
-const ICON = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${HOURGLASS}</svg>`;
+const ICON = MARK.replace('<svg ', '<svg class="icon" ');
 
 let sheet: CSSStyleSheet | null = null;
 function cardSheet(): CSSStyleSheet {

@@ -1,4 +1,4 @@
-import { HOURGLASS } from './card';
+import { MARK } from './card';
 import { priceOf, scanInline, type Found } from './detect';
 
 /**
@@ -10,25 +10,22 @@ export const BADGE_TAG = 'worth-it-badge';
 
 const BADGE_CSS = `
 :host {
-  all: initial !important; display: inline-block !important; width: 52px !important; height: 18px !important;
+  all: initial !important; display: inline-block !important; width: 56px !important; height: 20px !important;
   margin: 0 0 0 6px !important; padding: 0 !important; vertical-align: middle !important; flex: none !important;
-  position: static !important; color: var(--wi-color, CanvasText) !important;
+  position: static !important;
 }
 .b {
-  box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 3px;
-  width: 52px; height: 18px; border-radius: 9px;
+  box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px;
+  width: 56px; height: 20px; padding: 0 7px; border-radius: 6px;
+  background: rgba(24, 24, 27, 0.92); color: #fafafa;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.18);
   font: 600 11px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-variant-numeric: tabular-nums; letter-spacing: 0.01em; white-space: nowrap;
-  color: color-mix(in srgb, currentColor 78%, transparent);
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 16%, transparent);
   user-select: none; -webkit-font-smoothing: antialiased;
 }
-.b svg { flex: none; width: 9px; height: 9px; }
+.b svg { flex: none; width: 9px; height: 11px; opacity: 0.85; }
 .b span::before { content: attr(data-t); }
 `;
-
-const ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${HOURGLASS}</svg>`;
 
 interface Entry {
   host: HTMLElement;
@@ -52,15 +49,13 @@ export const foundForBadge = (host: Element) => byHost.get(host);
 
 function createBadge(found: Found, text: string): Entry {
   const host = document.createElement(BADGE_TAG);
-  // Match the price's text color; the only thing set on the host, and it's the page's own value.
-  host.style.setProperty('--wi-color', getComputedStyle(found.el).color);
   if (!sheet) {
     sheet = new CSSStyleSheet();
     sheet.replaceSync(BADGE_CSS);
   }
   const root = host.attachShadow({ mode: 'closed' });
   root.adoptedStyleSheets = [sheet];
-  root.innerHTML = `<div class="b">${ICON}<span></span></div>`;
+  root.innerHTML = `<div class="b">${MARK}<span></span></div>`;
   const label = root.querySelector('span')!;
   label.setAttribute('data-t', text);
   byHost.set(host, found);
