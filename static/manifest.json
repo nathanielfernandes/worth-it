@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Worth It?",
+  "version": "1.0.0",
+  "description": "See what prices cost in hours of your work. Your pay never leaves your device.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "action": {
+    "default_title": "Worth It?",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": ["storage", "alarms"],
+  "optional_host_permissions": ["https://api.frankfurter.dev/*"],
+  "commands": {
+    "toggle-site": {
+      "suggested_key": { "default": "Alt+Shift+W" },
+      "description": "Turn Worth It? on or off for the current site"
+    }
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; object-src 'none'; connect-src https://api.frankfurter.dev; img-src 'self' data:; style-src 'self'"
+  }
+}

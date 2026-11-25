@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Worth It?</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="top">
+        <div class="brand">
+          <img src="icons/icon-32.png" width="22" height="22" alt="" />
+          <span>Worth It?</span>
+        </div>
+        <label class="switch" title="Turn Worth It? on or off everywhere">
+          <input type="checkbox" id="enabled" />
+          <span class="track"></span>
+        </label>
+      </header>
+
+      <section class="welcome" id="welcome" hidden>
+        <h1>See every price in hours of work.</h1>
+        <p>Enter your pay below, then hover any price while you shop. Tabs that were already open need a reload.</p>
+      </section>
+
+      <section class="hero" id="hero">
+        <div class="hero-label">Your time is worth</div>
+        <div class="hero-value" id="heroValue">—</div>
+        <div class="hero-sub" id="heroSub">Enter your pay to get started</div>
+      </section>
+
+      <section class="panel">
+        <h2>Pay</h2>
+        <div class="seg" data-field="payMode" role="radiogroup" aria-label="Pay type">
+          <button type="button" value="steady">Same each time</button>
+          <button type="button" value="varies">It varies</button>
+        </div>
+
+        <div id="steady" class="stack">
+          <div class="field">
+            <label for="amount">You make</label>
+            <div class="combo">
+              <div class="money">
+                <span class="sym" data-symbol></span>
+                <input id="amount" inputmode="decimal" autocomplete="off" placeholder="0" />
+              </div>
+              <select id="period" aria-label="Pay period">
+                <option value="hour">per hour</option>
+                <option value="week">per week</option>
+                <option value="biweek">every 2 weeks</option>
+                <option value="semimonth">twice a month</option>
+                <option value="month">per month</option>
+                <option value="year">per year</option>
+              </select>
+            </div>
+          </div>
+          <div class="field">
+            <label for="hours">Hours worked</label>
+            <div class="combo">
+              <input id="hours" inputmode="decimal" autocomplete="off" placeholder="40" />
+              <select id="hoursPer" aria-label="Hours per">
+                <option value="week">per week</option>
+                <option value="period">per paycheck</option>
+              </select>
+              <span class="unit" id="hoursPerFixed" hidden>per week</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="varies" class="stack" hidden>
+          <div class="field">
+            <label for="variesPeriod">Paid</label>
+            <select id="variesPeriod">
+              <option value="week">every week</option>
+              <option value="biweek">every 2 weeks</option>
+              <option value="semimonth">twice a month</option>
+              <option value="month">every month</option>
+            </select>
+          </div>
+          <div class="checks">
+            <div class="checks-head"><span>Paycheck</span><span>Hours</span><span></span></div>
+            <div id="checks"></div>
+            <button type="button" class="add" id="addCheck">+ Add paycheck</button>
+          </div>
+          <p class="hint" id="checksSummary"></p>
+        </div>
+
+        <div class="field">
+          <label>These amounts are</label>
+          <div class="seg" data-field="basis" role="radiogroup" aria-label="Before or after tax">
+            <button type="button" value="net">After tax</button>
+            <button type="button" value="gross">Before tax</button>
+          </div>
+        </div>
+        <div class="field" id="pctRow" hidden>
+          <label for="takeHomePct">You keep about</label>
+          <div class="combo">
+            <input id="takeHomePct" inputmode="decimal" autocomplete="off" placeholder="75" />
+            <span class="unit">% after tax</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Schedule</h2>
+        <div class="grid2">
+          <div class="field">
+            <label for="daysPerWeek">Days per week</label>
+            <input id="daysPerWeek" inputmode="decimal" autocomplete="off" placeholder="5" />
+          </div>
+          <div class="field">
+            <label for="weeksPerYear">Weeks per year</label>
+            <input id="weeksPerYear" inputmode="decimal" autocomplete="off" placeholder="52" />
+          </div>
+        </div>
+        <p class="hint">Sets what a “workday” and “work year” mean.</p>
+      </section>
+
+      <section class="panel">
+        <h2>Display</h2>
+        <div class="field">
+          <label for="currency">You’re paid in</label>
+          <select id="currency"></select>
+        </div>
+        <label class="toggle">
+          <span>
+            <strong>Show badges next to prices</strong>
+            <small>Hover cards are always on</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="inline" /><span class="track"></span></span>
+        </label>
+        <label class="toggle" id="siteRow" hidden>
+          <span>
+            <strong>On for <span id="siteName"></span></strong>
+            <small id="shortcutHint"></small>
+          </span>
+          <span class="switch"><input type="checkbox" id="siteEnabled" /><span class="track"></span></span>
+        </label>
+      </section>
+
+      <section class="panel">
+        <h2>Prices in other currencies</h2>
+        <div class="seg" data-field="ratesMode" role="radiogroup" aria-label="Exchange rates">
+          <button type="button" value="manual">Manual</button>
+          <button type="button" value="once">Sync once</button>
+          <button type="button" value="daily">Daily</button>
+        </div>
+        <div class="sync" id="syncRow" hidden>
+          <span id="syncStatus"></span>
+          <button type="button" class="link" id="syncNow">Sync now</button>
+        </div>
+        <p class="hint" id="ratesHint"></p>
+        <div id="rates"></div>
+        <button type="button" class="add" id="addRate">+ Add rate</button>
+      </section>
+
+      <footer class="foot">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3M6 11h12v9H6z" /></svg>
+        <span>Your pay stays on this device. Websites can’t read it.</span>
+      </footer>
+    </main>
+
+    <template id="checkRow">
+      <div class="row">
+        <div class="money"><span class="sym" data-symbol></span><input data-k="amount" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Paycheck amount" /></div>
+        <input data-k="hours" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Hours on this paycheck" />
+        <button type="button" class="x" aria-label="Remove">×</button>
+      </div>
+    </template>
+
+    <template id="rateRow">
+      <div class="row rate">
+        <span class="eq">1</span>
+        <select data-k="from" aria-label="Foreign currency"></select>
+        <span class="eq">=</span>
+        <input data-k="value" inputmode="decimal" autocomplete="off" aria-label="Value in your currency" />
+        <span class="eq" data-k="to"></span>
+        <button type="button" class="x" aria-label="Remove">×</button>
+      </div>
+    </template>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

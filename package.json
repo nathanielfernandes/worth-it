@@ -1,0 +1,18 @@
+{
+  "name": "worth-it",
+  "version": "1.0.0",
+  "private": true,
+  "description": "See what prices cost in hours of your work. Everything stays on your device.",
+  "type": "module",
+  "scripts": {
+    "build": "bun build.mjs",
+    "watch": "bun build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "package": "bun run build && rm -f worth-it.zip && cd dist && zip -qr ../worth-it.zip ."
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.8",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  }
+}
