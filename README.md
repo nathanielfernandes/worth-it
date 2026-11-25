@@ -2,6 +2,8 @@
 
 A Chrome extension that shows prices in hours of your work. Hover any price to see what it costs you, like **8.3 hours**, or turn on small badges next to every price.
 
+<img src="docs/hover.png" width="419" alt="Hovering a $1,944 camera on Amazon shows a card reading “1.8 work weeks”">
+
 Your pay stays on your device. Websites can't read it, and nothing is sent anywhere unless you turn on exchange-rate syncing.
 
 ## Install
