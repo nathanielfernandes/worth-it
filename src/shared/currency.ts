@@ -34,11 +34,20 @@ export function guessCurrency(locale: string): string {
 
 const moneyFormats = new Map<string, Intl.NumberFormat>();
 
-export function formatMoney(amount: number, currency: string): string {
-  let fmt = moneyFormats.get(currency);
+const MONEY_STYLES: Record<'exact' | 'whole' | 'compact', Intl.NumberFormatOptions> = {
+  exact: {},
+  /** "$9,670" */
+  whole: { maximumFractionDigits: 0 },
+  /** "$9.7K", "$120K", "$1.2M": at most 2 significant digits, narrow symbol, for fixed-width badges. */
+  compact: { notation: 'compact', maximumSignificantDigits: 2, currencyDisplay: 'narrowSymbol' },
+};
+
+export function formatMoney(amount: number, currency: string, style: keyof typeof MONEY_STYLES = 'exact'): string {
+  const key = `${currency}:${style}`;
+  let fmt = moneyFormats.get(key);
   if (!fmt) {
-    fmt = new Intl.NumberFormat(undefined, { style: 'currency', currency });
-    moneyFormats.set(currency, fmt);
+    fmt = new Intl.NumberFormat(undefined, { style: 'currency', currency, ...MONEY_STYLES[style] });
+    moneyFormats.set(key, fmt);
   }
   return fmt.format(amount);
 }

@@ -8,10 +8,12 @@
  */
 
 export interface CardView {
-  /** Time of work, e.g. "8.3 hours". */
+  /** Headline: time of work ("8.3 hours") or grown value ("$9,670 in 20 years"). */
   title: string;
   /** The price, plus its conversion when foreign. */
   detail: string;
+  /** "Both" mode: the growth line under a divider. Empty hides it. */
+  growth: string;
 }
 
 const CARD_CSS = `
@@ -22,7 +24,7 @@ const CARD_CSS = `
   z-index: 2147483647 !important;
 }
 .card {
-  position: fixed; left: var(--x, 0px); top: var(--y, 0px); box-sizing: border-box; width: max-content; max-width: 280px;
+  position: fixed; left: var(--x, 0px); top: var(--y, 0px); box-sizing: border-box; width: 260px;
   padding: 10px 14px; border-radius: 12px;
   background: rgba(24, 24, 27, 0.94); color: #fafafa;
   -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
@@ -38,7 +40,10 @@ const CARD_CSS = `
 .title::before { content: attr(data-t); }
 .title { font-size: 18px; font-weight: 650; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .detail { margin: 1px 0 0 23px; color: rgba(250,250,250,0.55); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.detail::before { content: attr(data-t); }
+.growth { margin: 8px 0 0; padding-top: 7px; border-top: 1px solid rgba(255,255,255,0.09); font-size: 13px; font-weight: 550;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.growth[data-t=""] { display: none; }
+.detail::before, .growth::before { content: attr(data-t); }
 .toast { width: auto; padding: 9px 14px; border-radius: 999px; }
 .toast .title { font-size: 13px; font-weight: 550; }
 @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
@@ -112,7 +117,7 @@ export function showCard(target: Element, view: CardView): void {
   if (!host) {
     const created = createHost('worth-it-card');
     host = created.host;
-    created.root.innerHTML = `<div class="card"><div class="head">${ICON}<div class="title"></div></div><div class="detail"></div></div>`;
+    created.root.innerHTML = `<div class="card"><div class="head">${ICON}<div class="title"></div></div><div class="detail"></div><div class="growth"></div></div>`;
     card = created.root.querySelector('.card');
     addEventListener('scroll', schedulePlace, { capture: true, passive: true });
     addEventListener('resize', schedulePlace, { passive: true });
@@ -121,6 +126,7 @@ export function showCard(target: Element, view: CardView): void {
   anchor = target;
   setText(card.querySelector('.title'), view.title);
   setText(card.querySelector('.detail'), view.detail);
+  setText(card.querySelector('.growth'), view.growth);
   place();
   if (fresh) {
     // Next frame, so the entrance transition runs from the hidden state.

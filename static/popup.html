@@ -25,12 +25,22 @@
       </section>
 
       <section class="hero" id="hero">
-        <div class="hero-label">Your time is worth</div>
+        <div class="hero-label" id="heroLabel">Your time is worth</div>
         <div class="hero-value" id="heroValue">—</div>
         <div class="hero-sub" id="heroSub">Enter your pay to get started</div>
       </section>
 
       <section class="panel">
+        <h2>Show on prices</h2>
+        <div class="seg" data-field="show" role="radiogroup" aria-label="What to show on prices">
+          <button type="button" value="time">Time</button>
+          <button type="button" value="growth">Growth</button>
+          <button type="button" value="both">Both</button>
+        </div>
+        <p class="hint" id="showHint"></p>
+      </section>
+
+      <section class="panel" id="payPanel">
         <h2>Pay</h2>
         <div class="seg" data-field="payMode" role="radiogroup" aria-label="Pay type">
           <button type="button" value="steady">Same each time</button>
@@ -102,7 +112,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" id="schedulePanel">
         <h2>Schedule</h2>
         <div class="grid2">
           <div class="field">
@@ -117,10 +127,38 @@
         <p class="hint">Sets what a “workday” and “work year” mean.</p>
       </section>
 
+      <section class="panel" id="growthPanel" hidden>
+        <h2>If you invested it instead</h2>
+        <div class="grid2">
+          <div class="field">
+            <label for="growthRate">Return per year</label>
+            <div class="combo">
+              <input id="growthRate" inputmode="decimal" autocomplete="off" placeholder="7" />
+              <span class="unit">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="growthYears">For</label>
+            <div class="combo">
+              <input id="growthYears" inputmode="decimal" autocomplete="off" placeholder="20" />
+              <span class="unit">years</span>
+            </div>
+          </div>
+        </div>
+        <label class="toggle">
+          <span>
+            <strong>Compound</strong>
+            <small>Reinvest the returns every year</small>
+          </span>
+          <span class="switch"><input type="checkbox" id="compound" /><span class="track"></span></span>
+        </label>
+        <p class="hint">7% is about the long-run stock market return after inflation, so results read in today’s money.</p>
+      </section>
+
       <section class="panel">
         <h2>Display</h2>
         <div class="field">
-          <label for="currency">You’re paid in</label>
+          <label for="currency" id="currencyLabel">You’re paid in</label>
           <select id="currency"></select>
         </div>
         <label class="toggle">
@@ -130,6 +168,13 @@
           </span>
           <span class="switch"><input type="checkbox" id="inline" /><span class="track"></span></span>
         </label>
+        <div class="field" id="badgeRow" hidden>
+          <label>Badges show</label>
+          <div class="seg" data-field="badgeShows" role="radiogroup" aria-label="What badges show">
+            <button type="button" value="time">Time</button>
+            <button type="button" value="growth">Growth</button>
+          </div>
+        </div>
         <label class="toggle" id="siteRow" hidden>
           <span>
             <strong>On for <span id="siteName"></span></strong>

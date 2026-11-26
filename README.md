@@ -1,6 +1,6 @@
 # Worth It?
 
-Chrome extension that shows prices as hours of your work.
+Chrome extension that shows prices as hours of your work, or as what the money would grow to if you invested it instead.
 
 <img src="docs/hover.png" width="419" alt="">
 

@@ -1,3 +1,4 @@
 node_modules/
 dist/
 worth-it.zip
+.DS_Store

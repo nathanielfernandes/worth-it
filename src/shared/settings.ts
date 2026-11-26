@@ -48,6 +48,16 @@ export interface Settings {
   weeksPerYear: number;
   /** Show inline badges next to prices, in addition to the hover card. */
   inline: boolean;
+  /** What the card shows: time of work, what the price would grow to if invested, or both. */
+  show: 'time' | 'growth' | 'both';
+  /** Which single number badges show when `show` is "both". */
+  badgeShows: 'time' | 'growth';
+  /** Annual return used for growth, in percent. */
+  growthRate: number;
+  /** Years the price would be invested for. */
+  growthYears: number;
+  /** Compound yearly (true) or simple interest (false). */
+  compound: boolean;
   ratesMode: RatesMode;
   /** Manual exchange rates keyed "FROM>TO": value of 1 FROM in TO. */
   manualRates: Record<string, number>;
@@ -83,6 +93,11 @@ export function defaultSettings(locale = navigator.language): Settings {
     daysPerWeek: 5,
     weeksPerYear: 52,
     inline: false,
+    show: 'time',
+    badgeShows: 'time',
+    growthRate: 7,
+    growthYears: 20,
+    compound: true,
     ratesMode: 'manual',
     manualRates: {},
   };
@@ -125,6 +140,11 @@ export function normalizeSettings(raw: unknown): Settings {
     daysPerWeek: num(r.daysPerWeek, d.daysPerWeek, 1, 7),
     weeksPerYear: num(r.weeksPerYear, d.weeksPerYear, 1, 52),
     inline: typeof r.inline === 'boolean' ? r.inline : d.inline,
+    show: oneOf(r.show, ['time', 'growth', 'both'], d.show),
+    badgeShows: oneOf(r.badgeShows, ['time', 'growth'], d.badgeShows),
+    growthRate: num(r.growthRate, d.growthRate, 0, 100),
+    growthYears: num(r.growthYears, d.growthYears, 1, 80),
+    compound: typeof r.compound === 'boolean' ? r.compound : d.compound,
     ratesMode: oneOf(r.ratesMode, ['manual', 'once', 'daily'], d.ratesMode),
     manualRates,
   };

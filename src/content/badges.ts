@@ -10,13 +10,13 @@ export const BADGE_TAG = 'worth-it-badge';
 
 const BADGE_CSS = `
 :host {
-  all: initial !important; display: inline-block !important; width: 56px !important; height: 20px !important;
+  all: initial !important; display: inline-block !important; width: 64px !important; height: 20px !important;
   margin: 0 0 0 6px !important; padding: 0 !important; vertical-align: middle !important; flex: none !important;
   position: static !important;
 }
 .b {
   box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 4px;
-  width: 56px; height: 20px; padding: 0 7px; border-radius: 6px;
+  width: 64px; height: 20px; padding: 0 7px; border-radius: 6px;
   background: rgba(24, 24, 27, 0.92); color: #fafafa;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1), 0 1px 2px rgba(0,0,0,0.18);
   font: 600 11px/1 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -34,7 +34,8 @@ interface Entry {
   reinserts: number;
 }
 
-type Labeler = (found: Found) => string | null;
+/** Always returns text ("–" when unknown), so badge presence never depends on the user's settings. */
+type Labeler = (found: Found) => string;
 
 const entries = new Map<Element, Entry>();
 const byHost = new WeakMap<Element, Found>();
@@ -42,7 +43,7 @@ let sheet: CSSStyleSheet | null = null;
 let observer: MutationObserver | null = null;
 let pending = new Set<Element>();
 let timer = 0;
-let labeler: Labeler = () => null;
+let labeler: Labeler = () => '–';
 let user = 'USD';
 
 export const foundForBadge = (host: Element) => byHost.get(host);
@@ -71,18 +72,15 @@ function insert({ host, found }: Entry): void {
   else found.el.append(host);
 }
 
-function add(found: Found): void {
-  const text = labeler(found);
-  if (text) entries.set(found.el, createBadge(found, text));
-}
-
 function remove(el: Element, entry: Entry): void {
   entry.host.remove();
   entries.delete(el);
 }
 
 function scan(root: Element): void {
-  for (const found of scanInline(root, user, (el) => entries.has(el))) add(found);
+  for (const found of scanInline(root, user, (el) => entries.has(el))) {
+    entries.set(found.el, createBadge(found, labeler(found)));
+  }
 }
 
 /** Re-check tracked prices: gone, re-rendered by the page, or changed value. */
@@ -101,14 +99,13 @@ function revalidate(): void {
       insert(entry);
     }
     const found = priceOf(el, user);
-    const text = found && labeler(found);
-    if (!found || !text) {
+    if (!found) {
       remove(el, entry);
       continue;
     }
     entry.found = found;
     byHost.set(entry.host, found);
-    entry.label.setAttribute('data-t', text);
+    entry.label.setAttribute('data-t', labeler(found));
   }
 }
 

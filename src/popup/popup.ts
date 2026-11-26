@@ -11,7 +11,7 @@ import {
   type Settings,
   type SyncedRates,
 } from '../shared/settings';
-import { exchangeRate, longLabel, toSpan, workRate } from '../shared/work';
+import { exchangeRate, growthTerms, grownValue, longLabel, toSpan, workRate } from '../shared/work';
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
 
@@ -36,10 +36,31 @@ const show = (el: HTMLElement, visible: boolean) => {
 // ---------------------------------------------------------------------------
 // Rendering
 
+const SHOW_HINTS: Record<Settings['show'], string> = {
+  time: 'How long you’d work to pay for it.',
+  growth: 'What the money would grow to if you invested it instead.',
+  both: 'Time on top, investment growth underneath.',
+};
+
 function renderHero(): void {
   const hero = $('hero');
+  const label = $('heroLabel');
   const value = $('heroValue');
   const sub = $('heroSub');
+  const unit = document.createElement('small');
+
+  if (s.show === 'growth') {
+    const example = 1000;
+    hero.classList.remove('empty');
+    label.textContent = `${formatMoney(example, s.currency, 'whole')} invested instead becomes`;
+    const terms = growthTerms(s);
+    unit.textContent = ` in ${terms.years}`;
+    value.replaceChildren(formatMoney(grownValue(example, s), s.currency, 'whole'), unit);
+    sub.textContent = `at ${terms.rate} a year`;
+    return;
+  }
+
+  label.textContent = 'Your time is worth';
   const rate = workRate(s);
   hero.classList.toggle('empty', !rate);
   if (!rate) {
@@ -47,20 +68,18 @@ function renderHero(): void {
     sub.textContent = s.payMode === 'varies' ? 'Add a paycheck and its hours to get started' : 'Enter your pay to get started';
     return;
   }
-  const unit = document.createElement('small');
   unit.textContent = ' /hr';
   value.replaceChildren(formatMoney(rate.hourly, s.currency), unit);
   // A round example worth a few hours of work: $100 at $30/hr, ¥10,000 at ¥2,000/hr.
   const example = 10 ** Math.round(Math.log10(rate.hourly * 4));
-  const whole = new Intl.NumberFormat(undefined, { style: 'currency', currency: s.currency, maximumFractionDigits: 0 });
   sub.textContent =
-    `${whole.format(rate.hourly * rate.hoursPerDay)} per workday · ` +
-    `${whole.format(example)} ≈ ${longLabel(toSpan(example / rate.hourly, rate))}`;
+    `${formatMoney(rate.hourly * rate.hoursPerDay, s.currency, 'whole')} per workday · ` +
+    `${formatMoney(example, s.currency, 'whole')} ≈ ${longLabel(toSpan(example / rate.hourly, rate))}`;
 }
 
 function renderSegs(): void {
   for (const seg of document.querySelectorAll<HTMLElement>('.seg')) {
-    const field = seg.dataset.field as 'payMode' | 'basis' | 'ratesMode';
+    const field = seg.dataset.field as 'payMode' | 'basis' | 'ratesMode' | 'show' | 'badgeShows';
     for (const b of seg.querySelectorAll('button')) {
       b.setAttribute('role', 'radio');
       b.setAttribute('aria-checked', String(b.value === s[field]));
@@ -76,6 +95,13 @@ function renderVisibility(): void {
   const hourly = s.period === 'hour';
   show($('hoursPer'), !hourly);
   show($('hoursPerFixed'), hourly);
+  // Growth needs no pay, so pay and schedule only show when time is on.
+  show($('payPanel'), s.show !== 'growth');
+  show($('schedulePanel'), s.show !== 'growth');
+  show($('growthPanel'), s.show !== 'time');
+  show($('badgeRow'), s.show === 'both' && s.inline);
+  $('showHint').textContent = SHOW_HINTS[s.show];
+  $('currencyLabel').textContent = s.show === 'growth' ? 'Your currency' : 'You’re paid in';
   document.body.classList.toggle('off', !s.enabled);
   for (const el of document.querySelectorAll('[data-symbol]')) el.textContent = currencySymbol(s.currency);
 }
@@ -196,12 +222,14 @@ function renderSync(): void {
 function renderAll(): void {
   $<HTMLInputElement>('enabled').checked = s.enabled;
   $<HTMLInputElement>('inline').checked = s.inline;
+  $<HTMLInputElement>('compound').checked = s.compound;
   $<HTMLSelectElement>('currency').value = s.currency;
   $<HTMLSelectElement>('period').value = s.period;
   $<HTMLSelectElement>('variesPeriod').value = s.paycheckPeriod;
   $<HTMLSelectElement>('hoursPer').value = s.hoursPer;
-  for (const key of ['amount', 'hours', 'takeHomePct', 'daysPerWeek', 'weeksPerYear'] as const) {
-    $<HTMLInputElement>(key).value = s[key] ? String(s[key]) : '';
+  for (const { key } of NUMBER_FIELDS) {
+    // Blank instead of 0 for "not entered yet"; a 0% return is a real value.
+    $<HTMLInputElement>(key).value = s[key] === 0 && key !== 'growthRate' ? '' : String(s[key]);
   }
   loadRateRows();
   renderSegs();
@@ -222,12 +250,18 @@ function changed(): void {
 // ---------------------------------------------------------------------------
 // Wiring
 
-const NUMBER_FIELDS: { key: 'amount' | 'hours' | 'takeHomePct' | 'daysPerWeek' | 'weeksPerYear'; min: number; max: number }[] = [
+const NUMBER_FIELDS: {
+  key: 'amount' | 'hours' | 'takeHomePct' | 'daysPerWeek' | 'weeksPerYear' | 'growthRate' | 'growthYears';
+  min: number;
+  max: number;
+}[] = [
   { key: 'amount', min: 0, max: 1e9 },
   { key: 'hours', min: 0, max: 744 },
   { key: 'takeHomePct', min: 1, max: 100 },
   { key: 'daysPerWeek', min: 1, max: 7 },
   { key: 'weeksPerYear', min: 1, max: 52 },
+  { key: 'growthRate', min: 0, max: 100 },
+  { key: 'growthYears', min: 1, max: 80 },
 ];
 
 async function syncNow(): Promise<void> {
@@ -317,6 +351,10 @@ function wire(): void {
     s.inline = (e.target as HTMLInputElement).checked;
     changed();
   });
+  $<HTMLInputElement>('compound').addEventListener('change', (e) => {
+    s.compound = (e.target as HTMLInputElement).checked;
+    changed();
+  });
 
   for (const seg of document.querySelectorAll<HTMLElement>('.seg')) {
     seg.addEventListener('click', (e) => {
@@ -331,6 +369,10 @@ function wire(): void {
         s.payMode = button.value as Settings['payMode'];
       } else if (field === 'basis') {
         s.basis = button.value as Settings['basis'];
+      } else if (field === 'show') {
+        s.show = button.value as Settings['show'];
+      } else if (field === 'badgeShows') {
+        s.badgeShows = button.value as Settings['badgeShows'];
       }
       renderSegs();
       changed();
@@ -398,7 +440,7 @@ async function init(): Promise<void> {
   renderAll();
   wire();
   await initSite();
-  if (!workRate(s) && s.payMode === 'steady') $('amount').focus();
+  if (s.show !== 'growth' && !workRate(s) && s.payMode === 'steady') $('amount').focus();
 }
 
 void init();

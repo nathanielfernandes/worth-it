@@ -1,11 +1,12 @@
 # Privacy Policy
 
-Worth It? is a Chrome extension that shows prices as hours of your work.
+Worth It? is a Chrome extension that shows what prices cost you: in hours of your work, or in what the money would grow to if invested.
 
 ## What it handles
 
 - **Pay information you enter:** pay amount, pay period, hours worked, tax setting, currency, and any exchange rates you type in.
-- **Prices on pages you visit:** the extension reads price text on web pages in your browser to calculate how many hours an item costs.
+- **Investment settings you enter:** yearly return, number of years, and whether returns compound.
+- **Prices on pages you visit:** the extension reads price text on web pages in your browser to calculate the result.
 
 ## Where it goes
 

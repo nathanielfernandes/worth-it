@@ -56,6 +56,20 @@ export function exchangeRate(from: string, to: string, s: Settings, synced: Sync
   return f && t ? t / f : null;
 }
 
+/** What `amount` becomes after `growthYears` at `growthRate`% a year, compounded yearly or simple. */
+export function grownValue(amount: number, s: Settings): number {
+  const r = s.growthRate / 100;
+  return s.compound ? amount * (1 + r) ** s.growthYears : amount * (1 + r * s.growthYears);
+}
+
+/** Pieces for describing growth: "20 years", "7%" (or "7% simple"). */
+export function growthTerms(s: Settings): { years: string; rate: string } {
+  return {
+    years: `${numberFormat.format(s.growthYears)} ${s.growthYears === 1 ? 'year' : 'years'}`,
+    rate: `${numberFormat.format(s.growthRate)}%${s.compound ? '' : ' simple'}`,
+  };
+}
+
 export type Unit = 'sec' | 'min' | 'hr' | 'day' | 'week' | 'year';
 
 export interface Span {

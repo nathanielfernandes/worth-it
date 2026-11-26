@@ -11,7 +11,7 @@ let current: Found | null = null;
 let showTimer = 0;
 let hideTimer = 0;
 let user = 'USD';
-let describe: Describe = () => ({ title: '', detail: '' });
+let describe: Describe = () => ({ title: '', detail: '', growth: '' });
 
 function show(found: Found): void {
   current = found;
